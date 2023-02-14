@@ -10,3 +10,7 @@ Files:
 - **QP.m**, This is a class called "QP". Have this in the folder you are working in (or somewhere else on the MATLAB path), to make it available to your scripts. This class containts many functions that automates the plotting of a QP for you, and makes it super easy to test and tweak different parameters in your QP.
 
 - **UsingQPclass.m**, This is a script that shows how to use the QP class. Run each section in sequence as you read the comments, and learn how to use the QP class, such that you may use it to easily plot your QPs!
+
+
+Let me know if you find any bugs, of if there is some functionality you would want me to add.
+I have not tested this much yet, but the example scrips should work.
