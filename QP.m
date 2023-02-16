@@ -28,7 +28,7 @@ classdef QP < handle
         printHulls (1,1) {mustBeNumericOrLogical} = false;
         printObjective (1,1) {mustBeNumericOrLogical} = true;
         leg (1,1) struct;
-        nc (1,1) double = 3;
+        nc (1,1) double = 0;
         base_constraint (1,1) struct = struct('DisplayName',[],'LineStyle','-','LineWidth',2,'Color',[0.4 0.4 0.4]);
         points (1,:) cell = {};
         base_point (1,1) struct = struct('DisplayName','Point','MarkerSize',6.5,'Marker','o','MarkerEdgeColor',[0 0.4470 0.7410],'MarkerFaceColor',[0.466 0.674 0.188]);

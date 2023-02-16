@@ -37,7 +37,7 @@ b =    [ 20.5 ;       % constraint 1
 myQP.set_Ab(A,b)      % Add constraints to your QP object
 
 % Define range (where to plot / what x values to show):
-myQP.Range_x1( -0.5,  5.5) % From x1 = -1.1 to x1 = 5.5
+myQP.Range_x1( -0.5,  5.5) % From x1 = -0.5 to x1 = 5.5
 myQP.Range_x2( -0.5,  6.1) % From x2 = -0.5 to x2 = 6.1
 
 % Define levels at which to draw contour lines of the objective (optional)
