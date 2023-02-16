@@ -15,8 +15,9 @@ myQP.plot() % Plot the default QP
 
 
 %% Define your own QP
-clc;
+clc;clear;close all;
 
+myQP = QP('myQP name'); % Instansiate an instance of the QP class
 % Define Objective (f = x*H*x + c*x):
 myQP.H = [1 0;
         0 1];
@@ -171,7 +172,7 @@ myQP.plot()
 %% Style your points
 
 % see what field can be set:
-disp('These field are available for styling ')
+disp('These field are available for styling your points:')
 myQP.Points
 
 

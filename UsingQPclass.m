@@ -15,32 +15,33 @@ myQP.plot() % Plot the default QP
 
 
 %% Define your own QP
-clc;
+clc;clear;close all;
 
+myQP = QP('myQP name'); % Instansiate an instance of the QP class
 % Define Objective (f = x*H*x + c*x):
-myQP.H = [1 0;
-        0 1];
-myQP.c = -[2 5];
+myQP.H = 2*[1 0;
+            0 1];
+myQP.c = -[10 10];
 
 % Define linear constraints (Ax <= b):
-A =    [5.7    2.6;   % constraint 1
-        4.8   -2.5;   % constraint 2
+A =    [2    5;   % constraint 1
+        1   -2.5;   % constraint 2
         5.2    2.1;   % constraint 3
-         1     0;     % Limit on x1
-         0     1];    % Limit on x2
+         -1     0;     % Limit on x1
+         0     -1];    % Limit on x2
 b =    [ 20.5 ;       % constraint 1
          -5   ;       % constraint 2
-          8   ;       % constraint 3
-          0.8   ;     % Limit on x1
-          2.3   ];    % Limit on x2
+          15   ;       % constraint 3
+          0   ;     % Limit on x1
+          0   ];    % Limit on x2
 myQP.set_Ab(A,b)      % Add constraints to your QP object
 
 % Define range (where to plot / what x values to show):
-myQP.Range_x1( 0,  5.5) % From x1 = -1.1 to x1 = 5.5
-myQP.Range_x2( 0,  6.1) % From x2 = -0.5 to x2 = 6.1
+myQP.Range_x1( -0.5,  5.5) % From x1 = -1.1 to x1 = 5.5
+myQP.Range_x2( -0.5,  6.1) % From x2 = -0.5 to x2 = 6.1
 
 % Define levels at which to draw contour lines of the objective (optional)
-myQP.levels = -15:3:30; % (Don't set this if you want MATLAB to choose them for you)
+myQP.levels = -30:3:10; % (Don't set this if you want MATLAB to choose them for you)
 % myQP.levels = []; % OR set it to an empty array to make MATLAB choose for you
 
 % Plot your QP:
@@ -57,10 +58,23 @@ myQP.toggleConstraits(0);  % Turns constraints off
 myQP.plot()
 
 
+%% Plot constaints and infeasible regions
+
+myQP.toggleConstraits(1);  % Turn constraints back on
+myQP.toggleHulls(1);       % Turn on infeasible hulls
+
+%myQP.toggleObjective(0);   % Try turning off objective contours
+
+myQP.plot()
+
+
 %% Style your plot
 
 % Constraints on
 myQP.toggleConstraits(1)
+
+% ..and hulls off
+myQP.toggleHulls(0)
 
 
 %%%%%% Style the objective contours
@@ -101,7 +115,7 @@ myQP.Constraints(i).LineWidth   = 1.5;                 % Define contour line thi
 % Constraint 5 (Limit on x2):
 i = 5;
 myQP.Constraints(i).DisplayName = 'Strawberry Limit';       % Define legend entry
-myQP.Constraints(i).Color       = 'cyan';                 % Define color of constraint line (red)
+myQP.Constraints(i).Color       = 'black';                 % Define color of constraint line (red)
 myQP.Constraints(i).LineStyle   = ':';                 % Define line style (solid)
 myQP.Constraints(i).LineWidth   = 1.5;                 % Define contour line thickness
 
@@ -207,11 +221,6 @@ myQP.Points(3).DisplayName = "Carl's Smoothie";
 myQP.Points(3).MarkerFaceColor = 'b';
 
 myQP.plot()
-
-
-
-
-
 
 
 

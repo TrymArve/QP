@@ -5,12 +5,7 @@ classdef QP < handle
         H (2,2) double {mustBeReal} = [1 0; 0 1];
         c (1,2) double {mustBeReal} = [0;0];
         levels (:,1) double {mustBeReal} = [];%(0:5)';
-        A (:,2) double {mustBeReal} = -[4     -3;     % constraint 1
-                                        4.8   -1.5;   % constraint 2
-                                        1      1];    % constraint 3;
-        b (:,1) double {mustBeReal} = -[  0;        % constraint 1
-                                          0;        % constraint 2
-                                          5];       % constraint 3;
+
         fig (1,1);
         ax (1,1);
         x1_label (1,1) string = "x_1";
@@ -20,31 +15,43 @@ classdef QP < handle
         OptimalPoint (1,1) struct = struct('DisplayName','Optimal Point','MarkerSize',10,'Marker','hexagram','MarkerEdgeColor',[0 0.4470 0.7410],'MarkerFaceColor',[1 0.5478 0.8196]);
         Points (1,:) struct = struct('DisplayName',{},'MarkerSize',{},'Marker',{},'MarkerEdgeColor',{},'MarkerFaceColor',{});
         options = optimoptions('quadprog','Display','none');
+        Hull (1,:) struct = struct('Color',[],'Opacity',[]);
     end
 
     properties(Access = private)
-        Name (1,1) string;
-        x1_range (1,:) = 0:0.1:5;
-        x2_range (1,:) = 0:0.1:5;
         X1_mesh;
         X2_mesh;
-        Constrained (1,1) {mustBeNumericOrLogical} = true;
+        printConstraints (1,1) {mustBeNumericOrLogical} = true;
         printOpt (1,1) {mustBeNumericOrLogical} = false;
         printPoints (1,1) {mustBeNumericOrLogical} = false;
+        printLegend (1,1) {mustBeNumericOrLogical} = true;
+        printHulls (1,1) {mustBeNumericOrLogical} = false;
+        printObjective (1,1) {mustBeNumericOrLogical} = true;
         leg (1,1) struct;
         nc (1,1) double = 3;
         base_constraint (1,1) struct = struct('DisplayName',[],'LineStyle','-','LineWidth',2,'Color',[0.4 0.4 0.4]);
         points (1,:) cell = {};
-        base_point (1,:) struct = struct('DisplayName','Point','MarkerSize',6.5,'Marker','o','MarkerEdgeColor',[0 0.4470 0.7410],'MarkerFaceColor',[0.466 0.674 0.188]);
+        base_point (1,1) struct = struct('DisplayName','Point','MarkerSize',6.5,'Marker','o','MarkerEdgeColor',[0 0.4470 0.7410],'MarkerFaceColor',[0.466 0.674 0.188]);
         defualt_constraints_name (1,1) string = "Constraint";
+        base_hull (1,1) struct = struct('Color',[0.635 0.078 0.184],'Opacity',0.1)
+        hulls (1,:) cell = {};
     end
 
     properties(SetAccess = private, GetAccess = public)
+        Name (1,1) string;
+        x1_range (1,:) = 0:0.1:5;
+        x2_range (1,:) = 0:0.1:5;
         solution (:,1) double;
         objective_value (1,1) double;
         exitflag;
         output;
         lagrange_multipliers;
+        A (:,2) double {mustBeReal} = [4     -3;     % constraint 1
+                                       4.8   -1.5;   % constraint 2
+                                       1      1];    % constraint 3;
+        b (:,1) double {mustBeReal} =  [  0;        % constraint 1
+                                          0;        % constraint 2
+                                          5];       % constraint 3;
     end
 
     methods
@@ -60,6 +67,7 @@ classdef QP < handle
             QP.Constraints = QP.base_constraint;
             QP.Constraints(1:QP.nc) = QP.base_constraint;
             QP.setDefaultConstraints();
+            QP.setDefaultHulls();
         end
 
 
@@ -82,13 +90,14 @@ classdef QP < handle
                 QP.Constraints((length(QP.Constraints)+1):QP.nc) = QP.base_constraint;
             end
             QP.setDefaultConstraints();
+            QP.setDefaultHulls();
         end
 
         function[] = toggleConstraits(QP,input)
             if nargin > 1
-                QP.Constrained = input;
+                QP.printConstraints = input;
             else
-                QP.Constrained = ~QP.Constrained;
+                QP.printConstraints = ~QP.printConstraints;
             end
         end
    
@@ -108,12 +117,38 @@ classdef QP < handle
             end
         end
         
+        function[] = toggleLegend(QP,input)
+            if nargin > 1
+                QP.printLegend = input;
+            else
+                QP.printLegend = ~QP.printLegend;
+            end
+        end
+
+        function[] = toggleHulls(QP,input)
+            if nargin > 1
+                QP.printHulls = input;
+            else
+                QP.printHulls = ~QP.printHulls;
+            end
+        end
+
+        function[] = toggleObjective(QP,input)
+            if nargin > 1
+                QP.printObjective = input;
+            else
+                QP.printObjective = ~QP.printObjective;
+            end
+        end
+        
         function[] = plot(QP)
             cla(QP.ax);
             QP.setMesh();
             axis(QP.ax,[QP.x1_range(1) QP.x1_range(end) QP.x2_range(1) QP.x2_range(end)])
-            QP.plotObjective();
-            if QP.Constrained == true
+            if QP.printObjective == true
+                QP.plotObjective();
+            end
+            if QP.printConstraints == true
                 QP.plotConstraints();
             end
             if QP.printOpt == true
@@ -131,7 +166,7 @@ classdef QP < handle
         end
     
         function[] = solve(QP)
-            if QP.Constrained == true
+            if QP.printConstraints == true
                 A = QP.A; %#ok<PROP> 
                 b = QP.b; %#ok<PROP> 
             else
@@ -203,6 +238,9 @@ classdef QP < handle
             x1_high = QP.x1_range(end);
             x2_low  = QP.x2_range(1);
             x2_high = QP.x2_range(end);
+            frame = [x1_low x1_high x1_high x1_low;
+                     x2_low x2_low  x2_high x2_high];
+            b_frame = QP.A*frame;
             
             % Find where constraints touch the frame:
             Right   = all([x2_low <  f_2(x1_high), f_2(x1_high) <= x2_high],2);
@@ -212,27 +250,44 @@ classdef QP < handle
             Inframe = (Right + Left + Top + Bottom >= 2);
 
             % Plot the constraints that appear in range:
+            p = [];
             for i = 1:QP.nc
                 if Inframe(i)
                     x = [];
-                        if Right(i)
-                            f2 = f_2(x1_high);
-                            x(:,end+1) = [x1_high; f2(i)];
-                        end
-                        if Left(i)
-                            f2 = f_2(x1_low);
-                            x(:,end+1) = [x1_low; f2(i)];
-                        end
-                        if Top(i)
-                            f1 = f_1(x2_high);
-                            x(:,end+1) = [f1(i); x2_high];
-                        end
-                        if Bottom(i)
-                            f1 = f_1(x2_low);
-                            x(:,end+1) = [f1(i); x2_low]; %#ok<*AGROW> 
-                        end
-                    plot(QP.ax,x(1,1:2)',x(2,1:2)','LineStyle',QP.Constraints(i).LineStyle,'LineWidth',QP.Constraints(i).LineWidth,'Color',QP.Constraints(i).Color,'DisplayName',QP.Constraints(i).DisplayName)
+                    if Bottom(i)
+                        f1 = f_1(x2_low);
+                        x(:,end+1) = [f1(i); x2_low]; %#ok<*AGROW> 
+                    end
+                    if Right(i)
+                        f2 = f_2(x1_high);
+                        x(:,end+1) = [x1_high; f2(i)];
+                    end
+                    if Top(i)
+                        f1 = f_1(x2_high);
+                        x(:,end+1) = [f1(i); x2_high];
+                    end
+                    if Left(i)
+                        f2 = f_2(x1_low);
+                        x(:,end+1) = [x1_low; f2(i)];
+                    end
+                    if QP.printHulls == true
+                        plotHull();
+                    end
+                    p(end+1) = plot(QP.ax,x(1,1:2)',x(2,1:2)','LineStyle',QP.Constraints(i).LineStyle,'LineWidth',QP.Constraints(i).LineWidth,'Color',QP.Constraints(i).Color,'DisplayName',QP.Constraints(i).DisplayName);
                 end
+            end
+
+            for i = 1:length(p)
+                uistack(p(i),'top');
+            end
+            
+            function[] = plotHull()
+                inhull = (b_frame(i,:) > QP.b(i));
+                frameHull = frame(:,inhull);
+                hull = [frameHull x];
+                hull_ind = convhull(hull(1,:)',hull(2,:)');
+                FILL = fill(QP.ax,hull(1,hull_ind),hull(2,hull_ind),QP.Hull(i).Color,'FaceAlpha',QP.Hull(i).Opacity,'LineStyle','none');
+                FILL.Annotation.LegendInformation.IconDisplayStyle = 'off';
             end
         end
 
@@ -251,6 +306,13 @@ classdef QP < handle
                 QP.Constraints(i).DisplayName = [char(QP.defualt_constraints_name), ' ', num2str(i)];
                 color = 0.25*[1 1 1]*(i-1)./(QP.nc-1) + 0.65*[1 1 1]*((QP.nc-1)-(i-1))./(QP.nc-1);
                 QP.Constraints(i).Color = color;
+            end
+        end
+   
+        function[] = setDefaultHulls(QP)
+            for i = 1:QP.nc
+                QP.Hull(i).Color = QP.base_hull.Color;
+                QP.Hull(i).Opacity = QP.base_hull.Opacity;
             end
         end
     end
