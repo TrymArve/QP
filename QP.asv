@@ -33,7 +33,7 @@ classdef QP < handle
         printPoints (1,1) {mustBeNumericOrLogical} = false;
         leg (1,1) struct;
         nc (1,1) double = 3;
-        base_constraint (1,1) struct = struct('DisplayName',[],'LineStyle','-','LineWidth',2,'Color',[0.4 0.4 0.4]);
+        base_constraint (1,1) struct = struct('DisplayName','Constraint','LineStyle','-','LineWidth',2,'Color',[0.4 0.4 0.4]);
         points (1,:) cell = {};
         base_point (1,:) struct = struct('DisplayName','Point','MarkerSize',6.5,'Marker','o','MarkerEdgeColor',[0 0.4470 0.7410],'MarkerFaceColor',[0.466 0.674 0.188]);
         defualt_constraints_name (1,1) string = "Constraint";
@@ -59,7 +59,7 @@ classdef QP < handle
 
             QP.Constraints = QP.base_constraint;
             QP.Constraints(1:QP.nc) = QP.base_constraint;
-            QP.setDefaultConstraints();
+            QP.setConstraintColors();
         end
 
 
@@ -81,7 +81,7 @@ classdef QP < handle
             if length(QP.Constraints) < QP.nc
                 QP.Constraints((length(QP.Constraints)+1):QP.nc) = QP.base_constraint;
             end
-            QP.setDefaultConstraints();
+            QP.setConstraintColors();
         end
 
         function[] = toggleConstraits(QP,input)
@@ -246,9 +246,9 @@ classdef QP < handle
             end
         end
     
-        function[] = setDefaultConstraints(QP)
+        function[] = setConstraintColors(QP)
             for i = 1:QP.nc
-                QP.Constraints(i).DisplayName = [char(QP.defualt_constraints_name), ' ', num2str(i)];
+                QP.Constraints(i).DisplayName = [QP.Constraints(i).DisplayName, ' ', num2str(i)];
                 color = 0.25*[1 1 1]*(i-1)./(QP.nc-1) + 0.65*[1 1 1]*((QP.nc-1)-(i-1))./(QP.nc-1);
                 QP.Constraints(i).Color = color;
             end

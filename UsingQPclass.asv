@@ -171,7 +171,7 @@ myQP.plot()
 %% Style your points
 
 % see what field can be set:
-disp('These field are available for styling your points:')
+disp('These field are available for styling ')
 myQP.Points
 
 
