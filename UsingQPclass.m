@@ -223,5 +223,8 @@ myQP.Points(3).MarkerFaceColor = 'b';
 myQP.plot()
 
 
+%% Save as PDF
+myQP.savePDF()
+
 
 

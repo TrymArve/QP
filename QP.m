@@ -201,6 +201,15 @@ classdef QP < handle
             QP.points = {};
             QP.Points = struct('DisplayName',{},'MarkerSize',{},'Marker',{},'MarkerEdgeColor',{},'MarkerFaceColor',{});
         end
+    
+        function[] = savePDF(QP)
+            set(QP.fig,'Units','inches');
+            screenposition = get(QP.fig,'Position');
+            set(QP.fig,...
+                'PaperPosition',[0 0 screenposition(3:4)],...
+                'PaperSize',[screenposition(3:4)]);
+            print(QP.Name,'-dpdf','-bestfit')
+        end
     end
 
 

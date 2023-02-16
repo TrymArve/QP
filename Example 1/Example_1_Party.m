@@ -25,8 +25,8 @@ myQP = QP('Best Possible Party');
 
 % Define how fun a party is based on how much Coca Cola and Mountain Dew you buy:
 % (f = x*H*x + c*x)
-myQP.H =  [2 0;
-           0 1];
+myQP.H =  3*[2 0;
+             0 1];
 myQP.c = -10*[2 5];
 
 
@@ -54,7 +54,9 @@ myQP.set_Ab(A,b);
 
 
 
-%%%%%%% Style Qp appropriately
+%%%%%%% Style QP appropriately
+myQP.Objective.DisplayName = 'Funness of Party';
+
 myQP.Constraints(1).DisplayName = 'Minimum liters of Coca Colca';
 myQP.Constraints(1).Color = 'k';
 myQP.Constraints(1).LineStyle = '--';
