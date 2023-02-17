@@ -76,7 +76,7 @@ title( myQP.ax,'Optimal Study Plan')
 
 
 myQP.OptimalPoint.MarkerFaceColor = 'g';
-myQP.OptimalPoint.DisplayName = 'Otimal Study Plan';
+myQP.OptimalPoint.DisplayName = 'Optimal Study Plan';
 
 % plot:
 myQP.plot()
