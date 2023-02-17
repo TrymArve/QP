@@ -18,7 +18,12 @@ I have not tested this much yet, but the example scrips should work.
 
 See the examples. Here are the outputs of the examples:
 
+- Example 1:
+
+![Example_1_Optimal_Party](https://user-images.githubusercontent.com/55924651/219601053-89facfa8-b9e8-47d8-a406-95d8815be31d.png)
+
 - Example 2:
 
-![Example_2_Optimal_Study_Plan](https://user-images.githubusercontent.com/55924651/219599517-1f894bdb-93b4-4691-8538-e3066473b953.png)
+![Example_2_Optimal_Study_Plan](https://user-images.githubusercontent.com/55924651/219601061-c82b33dd-5ec0-43c9-b9a3-c8689fa9698b.png)
+
 
