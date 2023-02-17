@@ -85,8 +85,8 @@ axes(QP_figure)
 QP_axes = QP_figure.Children(1);
 
 % Give the axes object a title:
-myTitle = 'Quadratic Program Visualized';
-title(QP_axes,myTitle) % Add to current axes 
+myTitle = 'Quadratic Program Visualized'; % This will be the title text above the 'canvas'
+title(QP_axes,myTitle) % Add the title to the axes of your figure
 
 % Give labels to the axes:
 xlabel('x_1'); ylabel('x_2')
@@ -96,7 +96,7 @@ xlabel('x_1'); ylabel('x_2')
 hold on    % graphs are not deleted when new graphs are plotted
 grid off   % grid lines are not present in the figure (this is default)
 axis equal % Define the x- and y- axis to be equal
-% (there functions automatically applies the various properties to the 'current' axes. The 'current' axes is the axes object you last created/edited)
+% (these functions automatically applies the various properties to the 'current' axes. The 'current' axes is the axes object you last created/edited)
 
 
 %%%%% Placement and size of figure (window):
@@ -107,16 +107,17 @@ QP_figure.Units = 'centimeters'; % set the units of the figure to centimeters. (
 
 % Position/size on screen:
 LowerLeftCorner = [3,2]; % Position of the lower left corner of the figure window will be 3cm right to-, and 2cm above the lower left corner of the screen
-width = 15;    % The figure will be 11cm wide
-height = 15;   % The figure will be 11cm tall
+width = 15;    % The figure will be 15cm wide
+height = 15;   % The figure will be 15cm tall
 QP_figure.Position = [LowerLeftCorner, width, height];
 
 
 %% Plot the contours of the objective function
 
 % clear the axes object:
-cla % (deletes any lines/points already drawn in the axes object)
-clc
+cla % "clear axes" (deletes any lines/points already drawn in the axes object)
+clc % "clear command window"
+
 % Plot the contours of f at "levels" in the axes object in the figure:
 contour(QP_axes,X1_mesh,X2_mesh,F,levels,'DisplayName','Objective Function')
 
@@ -151,7 +152,7 @@ Inframe = (Right + Left + Top + Bottom >= 2);
 %%%%%% Plot the constraints:
 
 % Properties:
-LineWidth = [2,3,4];                   % First cinstraint will be 2 pixles wide, second will be 3 px, and thrid 1px.
+LineWidth = [2,3,4];                   % First cinstraint line will be 2 pixles wide, second will be 3 px, and thrid 1px.
 LineStyle = {'-.','-','--'};           % Choose from: '-', ':', '--', '.-'
 RGB = {[0.4000    0.4000    0.4000];   % Constraint 1 is grey
        [0.6350    0.0780    0.1840];   % Constraint 2 is red
