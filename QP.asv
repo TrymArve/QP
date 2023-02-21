@@ -224,7 +224,7 @@ classdef QP < handle
             I2 =   (I4-I1)/3 + I1;
             I3 = 2*(I4-I1)/3 + I1;
             for i = I
-                QP.Points(i).DisplayName = ['Iter ' num2str(i-1)];
+                QP.Points(i).DisplayName = ['Iter ' num2str(i)];
                 color = interp1([I1,I2,I3,I4],[color1; color2; color3; color4], i);
                 QP.Points(i).MarkerFaceColor = color;
             end
