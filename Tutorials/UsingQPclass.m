@@ -199,7 +199,13 @@ myQP.options.Algorithm = 'Active-Set'; % Alternatively set the option directly
 % supported as of February 2023. 
 % This method is a work-around, and might be a tad slow...
 
+% myQP.solveIterations() % Solve the problem and obtain iterations (slower than normal 'solve')
 
+% or:
+
+myQP.plotIterations() % Solve the problem and plot the iterations (contains "solveIterations()")
+
+myQP.Iterations  % Find the iterations here
 
 %% Add other points
 
