@@ -156,8 +156,6 @@ classdef QP < handle
             else
                 disp('toggleLimits: input must have size (1,1) or (2,2).')
             end
-
-            QP.includeLimits
         end
         
         function[] = plot(QP)
