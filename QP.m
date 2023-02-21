@@ -4,7 +4,8 @@ classdef QP < handle
         resolution (1,1) {mustBePositive,mustBeReal} = 0.1;
         H (2,2) double {mustBeReal} = [1 0; 0 1];
         c (1,2) double {mustBeReal} = [0;0];
-        levels (:,1) double {mustBeReal} = [];%(0:5)';
+        levels (:,1) double {mustBeReal} = [];
+        Limits (2,2) double {mustBeReal} = [0 inf; 0 inf]; % [x1_lower x1_upper;  x2_lower x2_upper]
 
         fig (1,1);
         ax (1,1);
@@ -27,6 +28,8 @@ classdef QP < handle
         printLegend (1,1) {mustBeNumericOrLogical} = true;
         printHulls (1,1) {mustBeNumericOrLogical} = false;
         printObjective (1,1) {mustBeNumericOrLogical} = true;
+        includeLimits (2,2) {mustBeNumericOrLogical} = [false, false;
+                                                        false, false];
         leg (1,1) struct;
         nc (1,1) double = 0;
         base_constraint (1,1) struct = struct('DisplayName',[],'LineStyle','-','LineWidth',2,'Color',[0.4 0.4 0.4]);
@@ -35,6 +38,7 @@ classdef QP < handle
         defualt_constraints_name (1,1) string = "Constraint";
         base_hull (1,1) struct = struct('Color',[0.635 0.078 0.184],'Opacity',0.1)
         hulls (1,:) cell = {};
+        Colors (1,:) cell = {[0.6350    0.0780    0.1840], [0    0.4470    0.7410], [0.4660    0.6740    0.1880], [0.9290    0.6940    0.1250], [0.4940    0.1840    0.5560], [0.8500    0.3250    0.0980], [0.3010    0.7450    0.9330], [0.9686    0.4980    0.7451]};
     end
 
     properties(SetAccess = private, GetAccess = public)
@@ -48,10 +52,10 @@ classdef QP < handle
         lagrange_multipliers;
         A (:,2) double {mustBeReal} = [4     -3;     % constraint 1
                                        4.8   -1.5;   % constraint 2
-                                       1      1];    % constraint 3;
+                                       1      1];    % constraint 3
         b (:,1) double {mustBeReal} =  [  0;        % constraint 1
                                           0;        % constraint 2
-                                          5];       % constraint 3;
+                                          5];       % constraint 3
     end
 
     methods
@@ -141,6 +145,21 @@ classdef QP < handle
             end
         end
         
+        function[] = toggleLimits(QP,input)
+            if size(input,1) == 1 && size(input,2) == 1
+                QP.includeLimits(:,:) = input;
+            elseif size(input,1) == 2 && size(input,2) == 2
+                QP.includeLimits(1,1) = input(1,1);
+                QP.includeLimits(1,2) = input(1,2);
+                QP.includeLimits(2,1) = input(2,1);
+                QP.includeLimits(2,2) = input(2,2);
+            else
+                disp('toggleLimits: input must have size (1,1) or (2,2).')
+            end
+
+            QP.includeLimits
+        end
+        
         function[] = plot(QP)
             cla(QP.ax);
             QP.setMesh();
@@ -148,8 +167,14 @@ classdef QP < handle
             if QP.printObjective == true
                 QP.plotObjective();
             end
+            if any(QP.includeLimits,"all")
+                QP.plotLimits();
+            end
             if QP.printConstraints == true
                 QP.plotConstraints();
+            end
+            if QP.printPoints == true
+                QP.plotPoints();
             end
             if QP.printOpt == true
                 QP.solve();
@@ -157,15 +182,13 @@ classdef QP < handle
                     QP.plotOptimalPoint();
                 end
             end
-            if QP.printPoints == true
-                QP.plotPoints();
-            end
-
             legend()
             QP.fig.Visible = 'on';
         end
     
         function[] = solve(QP)
+
+            % Inequalities
             if QP.printConstraints == true
                 A = QP.A; %#ok<PROP> 
                 b = QP.b; %#ok<PROP> 
@@ -173,7 +196,26 @@ classdef QP < handle
                 A = []; %#ok<PROP> 
                 b = []; %#ok<PROP> 
             end
-            [QP.solution, QP.objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = quadprog(2*QP.H, QP.c, A, b, [],[],[],[],[], QP.options);
+
+            % Limits
+            lb = [];
+            ub = [];
+            if any(QP.includeLimits(:,1))
+                lb = -inf(2,1);
+                lb(QP.includeLimits(:,1)) = QP.Limits(QP.includeLimits(:,1),1);
+            end
+            if any(QP.includeLimits(:,2))
+                ub = inf(2,1);
+                ub(QP.includeLimits(:,2)) = QP.Limits(QP.includeLimits(:,2),2);
+            end
+            % Might include later:
+            Aeq = []; 
+            x0 = []; 
+            beq = [];
+
+            % Solve:
+            [QP.solution, QP.objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = quadprog(2*QP.H, QP.c, A, b, Aeq,beq,lb,ub,x0, QP.options); %#ok<PROP> 
+
             switch QP.exitflag
                 case 1
                 case 0
@@ -310,11 +352,53 @@ classdef QP < handle
             end
         end
     
+        function[] = plotLimits(QP)
+            x1_low  = QP.x1_range(1);
+            x1_high = QP.x1_range(end);
+            x2_low  = QP.x2_range(1);
+            x2_high = QP.x2_range(end);
+
+            color = [0.494 0.184 0.556];
+            alpha = 0.15;
+
+            % Lower Limit on x1:
+            if QP.includeLimits(1,1) && QP.Limits(1,1) > x1_low && QP.Limits(1,1) < x1_high
+                hull = [x1_low QP.Limits(1,1) QP.Limits(1,1)  x1_low;
+                        x2_low    x2_low         x2_high      x2_high];
+                FILL = fill(QP.ax,hull(1,:),hull(2,:),color,'FaceAlpha',alpha,'LineStyle','none');
+                FILL.Annotation.LegendInformation.IconDisplayStyle = 'off';
+            end
+
+            % Lower Limit on x2:
+            if QP.includeLimits(2,1) && QP.Limits(2,1) > x2_low && QP.Limits(2,1) < x2_high
+                hull = [x1_low    x1_high      x1_high             x1_low;
+                        x2_low    x2_low    QP.Limits(2,1)     QP.Limits(2,1)];
+                FILL = fill(QP.ax,hull(1,:),hull(2,:),color,'FaceAlpha',alpha,'LineStyle','none');
+                FILL.Annotation.LegendInformation.IconDisplayStyle = 'off';
+            end
+
+            % Upper Limit on x1:
+            if QP.includeLimits(1,2) && QP.Limits(1,2) > x1_low && QP.Limits(1,2) < x1_high
+                hull = [QP.Limits(1,2) x1_high   x1_high    QP.Limits(1,2) ;
+                            x2_low     x2_low    x2_high       x2_high];
+                FILL = fill(QP.ax,hull(1,:),hull(2,:),color,'FaceAlpha',alpha,'LineStyle','none');
+                FILL.Annotation.LegendInformation.IconDisplayStyle = 'off';
+            end
+
+            % Upper Limit on x2:
+            if QP.includeLimits(2,2) && QP.Limits(2,2) > x2_low && QP.Limits(2,2) < x2_high
+                hull = [    x1_low            x1_high       x1_high x1_low;
+                        QP.Limits(2,2)     QP.Limits(2,2)   x2_high x2_high];
+                FILL = fill(QP.ax,hull(1,:),hull(2,:),color,'FaceAlpha',alpha,'LineStyle','none');
+                FILL.Annotation.LegendInformation.IconDisplayStyle = 'off';
+            end
+        end
+        
         function[] = setDefaultConstraints(QP)
             for i = 1:QP.nc
                 QP.Constraints(i).DisplayName = [char(QP.defualt_constraints_name), ' ', num2str(i)];
-                color = 0.25*[1 1 1]*(i-1)./(QP.nc-1) + 0.65*[1 1 1]*((QP.nc-1)-(i-1))./(QP.nc-1);
-                QP.Constraints(i).Color = color;
+                %color = 0.25*[1 1 1]*(i-1)./(QP.nc-1) + 0.65*[1 1 1]*((QP.nc-1)-(i-1))./(QP.nc-1);
+                QP.Constraints(i).Color = QP.Colors{i};
             end
         end
    

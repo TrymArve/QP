@@ -57,10 +57,26 @@ myQP.toggleConstraits(0);  % Turns constraints off
 
 myQP.plot()
 
+%% Include Limits in a separate "Limits" variable
+
+x1_max = 4.3;  % x1 <= x1_max
+x1_min = 3.1;  % x1 >= x1_min
+x2_max = 4.1;  % x2 <= x2_max
+x2_min = 0;    % x2 >= x2_min
+
+myQP.Limits = [x1_min x1_max; x2_min x2_max];
+
+%myQP.toggleLimits(1)  % Turn on  all limits
+%myQP.toggleLimits(0)  % Turn off all limits
+myQP.toggleLimits([true 1; 0 false]) % Turn on specific limits with either a numeric or logical value
+
+myQP.plot()
 
 %% Plot constaints and infeasible regions
 
+myQP.toggleLimits(0)       % Turn Limits back off 
 myQP.toggleConstraits(1);  % Turn constraints back on
+
 myQP.toggleHulls(1);       % Turn on infeasible hulls
 
 %myQP.toggleObjective(0);   % Try turning off objective contours
@@ -155,9 +171,10 @@ myQP.plot()
 myQP.toggleConstraits(0)
 myQP.plot()
 
-myQP.toggleConstraits() % Turn them on again
 
 %% Style The optimal point
+
+myQP.toggleConstraits() % Turn optimal point on again
 
 myQP.OptimalPoint.DisplayName       = 'My optimal Smoothie';
 myQP.OptimalPoint.MarkerSize        = 11;                  % Marker size
@@ -226,5 +243,6 @@ myQP.plot()
 %% Save as PDF
 myQP.savePDF()
 
+% See working directory for your newly created pdf
 
 
