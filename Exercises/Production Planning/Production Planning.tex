@@ -1,0 +1,37 @@
+\documentclass{article}
+
+\title{TTK4135 - Exercise 4 - Problem 2}
+\date{February 2023}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,  
+    urlcolor= red
+    }
+
+\begin{document}
+
+\maketitle
+
+This problem is meant to be solved using the template found at:\\
+\href{https://github.com/TrymArve/QP/tree/main/Exercises/Production\%20Planning}{GitHub: QP - Production Planning}. The problem is an old problem that appeared as problem 2 in exercise 4 for the course \textit{TTK4135 - Optimization and Control} at NTNU.
+
+\section*{Problem 2 - Reactor Production Planning}
+Two reactors, $R_I$ and $R_{II}$, produce two products $A$ and $B$. To make 1000 kg of A, 2 hours of $R_I$ and 1 hour of $R_{II}$ are required. To make 1000 kg of B, 1 hour of $R_I$ and 3 hours of $R_{II}$ are required. The order of $R_I$ and $R_{II}$ does not matter. $R_I$ and $ R_{II}$ are available for 8 and 15 hours, respectively. We want to maximize the profit from selling the two products.
+
+The profit now depends on the production rate:
+\begin{itemize}
+	\item the profit from $A$ is $3-0.4x_{1}$ per tonne produced,
+	\item the profit from $B$ is $2-0.2x_{2}$ per tonne produced,
+\end{itemize}
+where $x_1$ is the production of product $A$ and $x_2$ is the production of product $B$ (both in number of tonnes).
+
+\begin{itemize}
+    \item[a)] Formulate this as a quadratic program.
+    \item[b)] Make a contour plot and sketch the constraints (try using the QP class).
+    \item[c)] Find the production of $A$ and $B$ that maximizes the total profit. Is the solution found at a point of intersection between the constraints? Are all constraints active? Mark the iterations on the plot made in b), as well as the iteration number.
+    \item[d)] The solution is calculated by an active-set method. Explain how this method works based on the sequence of iterations from c).
+\end{itemize}
+
+
+\end{document}
