@@ -184,6 +184,22 @@ myQP.OptimalPoint.MarkerFaceColor   = [0.929 0.694 0.125]; % Yellow fill
 
 myQP.plot()
 
+%% Change Optimization Algorithm
+
+myQP.algAS()  % Change to 'Active-Set'
+myQP.algIP()  % Change to 'Interior-Point-Convex' (default)
+
+% or:
+
+myQP.options.Algorithm = 'Active-Set'; % Alternatively set the option directly
+
+%% Inspect Iterations
+
+% Inspecting the iteration values within the optimization algorithm is not
+% supported as of February 2023. 
+% This method is a work-around, and might be a tad slow...
+
+
 
 %% Add other points
 
