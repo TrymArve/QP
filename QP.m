@@ -6,6 +6,7 @@ classdef QP < handle
         c (1,2) double {mustBeReal} = [0;0];
         levels (:,1) double {mustBeReal} = [];
         Limits (2,2) double {mustBeReal} = [0 inf; 0 inf]; % [x1_lower x1_upper;  x2_lower x2_upper]
+        x0 (2,1) double {mustBeReal} = [0; 0]; % initial guess for optimization algorithm (when using 'active-set')
 
         fig (1,1);
         ax (1,1);
@@ -20,8 +21,15 @@ classdef QP < handle
     end
 
     properties(Access = private)
+        % variables
         X1_mesh;
         X2_mesh;
+        leg (1,1) struct;
+        nc (1,1) double = 0;
+        tempIteration (2,1) double {mustBeReal};
+
+
+        %Flags
         printConstraints (1,1) {mustBeNumericOrLogical} = true;
         printOpt (1,1) {mustBeNumericOrLogical} = false;
         printPoints (1,1) {mustBeNumericOrLogical} = false;
@@ -30,10 +38,12 @@ classdef QP < handle
         printObjective (1,1) {mustBeNumericOrLogical} = true;
         includeLimits (2,2) {mustBeNumericOrLogical} = [false, false;
                                                         false, false];
-        leg (1,1) struct;
-        nc (1,1) double = 0;
+        printMaxIterExc (1,1) {mustBeNumericOrLogical} = true;
+
+
+
+        % base settings
         base_constraint (1,1) struct = struct('DisplayName',[],'LineStyle','-','LineWidth',2,'Color',[0.4 0.4 0.4]);
-        points (1,:) cell = {};
         base_point (1,1) struct = struct('DisplayName','Point','MarkerSize',6.5,'Marker','o','MarkerEdgeColor',[0 0.4470 0.7410],'MarkerFaceColor',[0.466 0.674 0.188]);
         defualt_constraints_name (1,1) string = "Constraint";
         base_hull (1,1) struct = struct('Color',[0.635 0.078 0.184],'Opacity',0.1)
@@ -56,6 +66,9 @@ classdef QP < handle
         b (:,1) double {mustBeReal} =  [  0;        % constraint 1
                                           0;        % constraint 2
                                           5];       % constraint 3
+
+        Iterations (2,:) double {mustBeReal} = [;];
+        points (1,:) cell = {};
     end
 
     methods
@@ -97,6 +110,14 @@ classdef QP < handle
             QP.setDefaultHulls();
         end
 
+        function[] = algAS(QP)
+            QP.options.Algorithm = 'active-set';
+        end
+
+        function[] = algIP(QP)
+            QP.options.Algorithm = 'interior-point-convex';
+        end
+        
         function[] = toggleConstraits(QP,input)
             if nargin > 1
                 QP.printConstraints = input;
@@ -160,6 +181,7 @@ classdef QP < handle
         
         function[] = plot(QP)
             cla(QP.ax);
+            figure(QP.fig);
             QP.setMesh();
             axis(QP.ax,[QP.x1_range(1) QP.x1_range(end) QP.x2_range(1) QP.x2_range(end)])
             if QP.printObjective == true
@@ -184,6 +206,69 @@ classdef QP < handle
             QP.fig.Visible = 'on';
         end
     
+        function[] = plotIterations(QP)
+            
+
+            QP.solveIterations();
+            nPrevPoints = length(QP.points);
+
+            QP.addPoints(QP.Iterations);
+            
+            I = (1:size(QP.Iterations,2)) + nPrevPoints;
+            for i = I
+                QP.Points(i).DisplayName = ['Iter ' num2str(i)];
+                color = interp1([I(1),I(end)],[0.6350    0.0780    0.1840; 0.4660    0.6740    0.1880], i);
+                QP.Points(i).MarkerFaceColor = color;
+            end
+            
+            % Store setting
+            printPoints = QP.printPoints;
+            printOpt = QP.printOpt;
+
+            % set settings
+            QP.printPoints = true;
+            QP.printOpt = true;
+
+            % plot
+            QP.plot()
+
+            % Restore settings
+            QP.printOpt = printOpt;
+            QP.printPoints = printPoints;
+        end
+        
+        function[] = solveIterations(QP)
+
+            % Check that solution exists
+            QP.solve();
+            if QP.exitflag ~= 1
+                return;
+            end
+            nIter = QP.output.iterations;
+
+            maxIterations = QP.options.MaxIterations;
+            displaySetting = QP.options.Display;
+            QP.printMaxIterExc = false;
+
+            % find initial guess: (not definable via x0 for all algorithms)
+            QP.options.MaxIterations = 0;
+            QP.solve();
+            QP.Iterations = QP.tempIteration;
+            
+            for i = 1:nIter-1
+                QP.options.MaxIterations = i;
+                QP.solve();
+                QP.Iterations(:,end+1) = QP.tempIteration;
+            end
+
+            if isnumeric(maxIterations)
+                QP.options.MaxIterations = maxIterations;
+            else
+                QP.options = resetoptions(QP.options,'MaxIterations');
+            end
+            QP.options.Display = displaySetting;
+        end
+        
         function[] = solve(QP)
 
             % Inequalities
@@ -206,18 +291,23 @@ classdef QP < handle
                 ub = inf(2,1);
                 ub(QP.includeLimits(:,2)) = QP.Limits(QP.includeLimits(:,2),2);
             end
+
             % Might include later:
             Aeq = []; 
-            x0 = []; 
             beq = [];
 
             % Solve:
-            [QP.solution, QP.objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = quadprog(2*QP.H, QP.c, A, b, Aeq,beq,lb,ub,x0, QP.options); %#ok<PROP> 
+            [solution, QP.objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = quadprog(2*QP.H, QP.c, A, b, Aeq,beq,lb,ub,QP.x0, QP.options); %#ok<PROP> 
 
             switch QP.exitflag
                 case 1
+                    QP.solution = solution; %#ok<*PROP> 
                 case 0
-                    disp('Maximum Iterations Exceeded...')
+                    if QP.printMaxIterExc
+                        disp('Maximum Iterations Exceeded...')
+                    else
+                        QP.tempIteration = solution;
+                    end
                 case -2
                     disp('Problem is infeasible... Or, for "interior-point-convex", the step size was smaller than options.StepTolerance, but constraints were not satisfied.')
                 case -3
