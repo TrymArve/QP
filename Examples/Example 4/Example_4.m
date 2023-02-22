@@ -5,13 +5,15 @@ clc;clear;close all;
 IPQP = makeQP('QP - Interior-Point');
 IPQP.plotIterations
 
+%% Save IP as PDF
+IPQP.savePDF
+
 %% Active Set
 ASQP = makeQP('QP - Active-Set');
 ASQP.algAS
 ASQP.plotIterations
 
-%% Save as PDF
-%IPQP.savePDF
+%% Save AS as PDF
 ASQP.savePDF
 
 
