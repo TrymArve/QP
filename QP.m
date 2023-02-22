@@ -2,8 +2,8 @@ classdef QP < handle
 
     properties(Access = public)
         resolution (1,1) {mustBePositive,mustBeReal} = 0.1;
-        H (2,2) double {mustBeReal} = [1 0; 0 1];
-        c (1,2) double {mustBeReal} = [0;0];
+        H (2,2) double {mustBeReal} = [0 0; 0 0];
+        c (2,1) double {mustBeReal} = [0;0];
         levels (:,1) double {mustBeReal} = [];
         Limits (2,2) double {mustBeReal} = [0 inf; 0 inf]; % [x1_lower x1_upper;  x2_lower x2_upper]
         x0 (2,1) double {mustBeReal} = [0; 0]; % initial guess for optimization algorithm (when using 'active-set')
@@ -39,6 +39,7 @@ classdef QP < handle
         includeLimits (2,2) {mustBeNumericOrLogical} = [false, false;
                                                         false, false];
         printMaxIterExc (1,1) {mustBeNumericOrLogical} = true;
+        stopIterations (1,1) {mustBeNumericOrLogical} = false;
 
 
 
@@ -210,6 +211,12 @@ classdef QP < handle
             
 
             QP.solveIterations();
+            if QP.stopIterations
+                QP.stopIterations = false;
+                disp('Cannot plot iterations')
+                return;
+            end
+
             nPrevPoints = length(QP.points);
 
             QP.addPoints(QP.Iterations);
@@ -249,7 +256,9 @@ classdef QP < handle
 
             % Check that solution exists
             QP.solve();
-            if QP.exitflag ~= 1
+            if QP.exitflag ~= 1 || all(~QP.H,"all")
+                QP.stopIterations = true;
+                disp('Cannot solve for iterations')
                 return;
             end
             nIter = QP.output.iterations;
@@ -305,8 +314,12 @@ classdef QP < handle
             beq = [];
 
             % Solve:
-            [solution, QP.objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = quadprog(2*QP.H, QP.c, A, b, Aeq,beq,lb,ub,QP.x0, QP.options); %#ok<PROP> 
-
+            if any(QP.H)
+                [solution, QP.objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = quadprog(2*QP.H, QP.c, A, b, Aeq,beq,lb,ub,QP.x0, QP.options); %#ok<PROP> 
+            else
+                options = optimoptions("linprog",QP.options);
+                [solution, objective_value, QP.exitflag, QP.output, QP.lagrange_multipliers] = linprog(QP.c, A, b, Aeq,beq,lb,ub, options); %#ok<PROP> 
+            end
             switch QP.exitflag
                 case 1
                     QP.solution = solution; %#ok<*PROP> 

@@ -9,7 +9,7 @@ myQP = QP('QP - Optimal Study Plan'); % Instansiate an instance of the QP class
 % Amount of learning per day (inverted due to 'minimization')(f = x*H*x + c*x):
 myQP.H = 0.5*[1 0;
             0 1];
-myQP.c = -[15 10];
+myQP.c = -[15; 10];
 
 % Define linear constraints (Ax <= b):
 A =    [3      5;   % how exhausted you get in a day based on how much you study
