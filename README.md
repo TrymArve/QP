@@ -27,10 +27,16 @@ Here are the outputs of the examples, so you can see some of what the QP class c
 
 - Example 1:
 
-![Example_1_Optimal_Party](https://user-images.githubusercontent.com/55924651/219601053-89facfa8-b9e8-47d8-a406-95d8815be31d.png)
+<img src="https://user-images.githubusercontent.com/55924651/219601053-89facfa8-b9e8-47d8-a406-95d8815be31d.png" width="400" height="410">
 
 - Example 2:
 
-![Example_2_Optimal_Study_Plan](https://user-images.githubusercontent.com/55924651/219601061-c82b33dd-5ec0-43c9-b9a3-c8689fa9698b.png)
+<img src="https://user-images.githubusercontent.com/55924651/219601061-c82b33dd-5ec0-43c9-b9a3-c8689fa9698b.png" width="400" height="410">
 
+- Example 3:
 
+<img src="https://user-images.githubusercontent.com/55924651/220651134-4ae493e7-3a2a-42dd-8d94-aa8417fe77e8.png" width="400" height="400">
+
+- Example 4:
+
+<img src="https://user-images.githubusercontent.com/55924651/220651259-4c67923d-bcdc-46aa-97bf-e92827f31e7f.png" width="800" height="400">
