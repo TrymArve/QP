@@ -2,13 +2,21 @@
 %% DEFINITION
 clc;clear;close all
 % Model:
+Dt = 1;
 % ( x_{k+1} = A*x_{k} + B*u_{k} )
-A = [   1      0    0    ;
-        0      0    1    ;
-        0.1  -0.76  2   ];
-B = [ 2     ;
-      0.0   ;
-      0.1   ];
+% A = [ -2.1  0.7  0.3 ;
+%         1    0    0  ;
+%         0    1    0  ]*Dt;
+% B = [ 0.8 ;
+%        0  ;
+%       3.2 ];
+
+A = [   0     0    0    ;
+        0     0    1    ;
+        0.1 -0.79 1.78 ]*Dt;
+B = [ 1 ;
+      0  ;
+      0.1 ];
 
 [nx,nu] = size(B);
 
@@ -20,14 +28,14 @@ x0 = [  4  ;
 % Desired end state
 xf = [ 2.3  ;
         1   ;
-       -1  ];
+       -1  ]*0;
 
 % Bounds on input:
-ulb = -30*ones(nu,1); 
-uub = 30*ones(nu,1);
+ulb = -inf*ones(nu,1); 
+uub = inf*ones(nu,1);
 
 % Horizon
-N = 10;
+N = 20;
 
 %% Reduced Space Method 1 - Fixed end state
 
@@ -46,15 +54,15 @@ Uub = kron(ones(N,1),uub);
 U = quadprog(2*eye(N*nu),[],[],[],Aeq,beq,Ulb,Uub);
 
 % Reshape
-U = reshape(U,nu,[]);
+U = reshape(U,nu,[])
+
+Title = 'Reduced Space - Fixed end state';
+plotTrajectories
 
 %%%%%%% Use Method 2 to check state trajectory:
 [A_RED_N, B_RED_N] = ReducedSpace_full(A,B,N);
 X = A_RED_N*x0 + B_RED_N*reshape(U,[],1);
-X = reshape(X,nx,[]);
-
-Title = 'Reduced Space - Fixed end state';
-plotTrajectories
+X = reshape(X,nx,[])
 
 
 %% Reduced Space Method 2 - State Constraints
@@ -87,12 +95,13 @@ bin = [ Xub - A_RED_N*x0;
 % Solve:
 U = quadprog(2*(eye(N*nu) + B_RED_N'*B_RED_N),2*x0'*A_RED_N'*B_RED_N,Ain,bin,[],[],Ulb,Uub);
 
+
 % % View resulting state trajectory:
 X = A_RED_N*x0 + B_RED_N*U;
 
 % Reshape
-U = reshape(U,nu,[]);
-X = reshape(X,nx,[]);
+U = reshape(U,nu,[])
+X = reshape(X,nx,[])
 
 Title = 'Reduced Space - State Constraints';
 plotTrajectories
@@ -145,8 +154,8 @@ U = z((N*nx) + (1:N*nu));
 X = z(1:(N*nx));
 
 % Reshape
-U = reshape(U,nu,[]);
-X = reshape(X,nx,[]);
+U = reshape(U,nu,[])
+X = reshape(X,nx,[])
 
 Title = 'Full Space';
 plotTrajectories
