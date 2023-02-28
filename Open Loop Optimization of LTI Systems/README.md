@@ -7,4 +7,4 @@ If you have any questions, or would like me to add something, please contact me.
 
 The example script uses the functions found in the "MATLAB Functions" folder, but they are also included directly in the script.
 
-#### Do NOT use the functions form the "MATLAB Functions" folder for MPC purposes!! They are written to be easy to understand for beginners, and not to be fast.
+#### Do NOT use the functions form the "MATLAB Functions" folder for MPC purposes if they have to be used on-line!! They are written to be easy to understand for beginners, and not to be fast.
