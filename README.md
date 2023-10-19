@@ -1,6 +1,6 @@
 # QP
 This repository hosts a MATLAB class "QP" that simplifies the process defining, solving, plotting and styling your Quadratic Program (with two decision variables).
-The repo is divided into Tutorials, Exercises and Examples, aimed at teaching beginners how to plot QPs in a simpel manner, teaching you how to use the QP-class, and give exercise in formulating QPs.
+The repo is divided into Tutorials, Exercises and Examples, aimed at teaching beginners how to plot QPs in a simple manner, teaching you how to use the QP-class, and give exercise in formulating QPs.
 
 Let me know (create an issue, or send me a message) if you find any bugs, of if there is some functionality you would want me to add.
 Though it seems to work very well, I have not tested this extensively, and there are always some bugs/unintentional stuff that sneaks in.
