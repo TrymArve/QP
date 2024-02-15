@@ -4,6 +4,7 @@ clc;clear;close all;
 %% Inerior Point Convex
 IPQP = makeQP('QP - Interior-Point');
 IPQP.plotIterations
+% legend('off') % use this to turn off the legend form your figure if you want to.
 
 %% Save IP as PDF
 IPQP.savePDF
